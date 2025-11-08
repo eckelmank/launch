@@ -1,0 +1,407 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Temple Terrace Resource Navigator</title>
+<style>
+:root{--brand:#1b5e20;--brand-2:#2e7d32;--gold:#caa64b;--ink:#1f2a2e;--muted:#5b6a70;--line:#e6ecef;--bg:#f7f9fb;--card:#ffffff;--shadow:0 10px 28px rgba(8,15,20,.06)}
+*{box-sizing:border-box}
+html,body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--brand);text-decoration:none}
+.wrap{max-width:1100px;margin:auto;padding:0 22px}
+header{position:sticky;top:0;z-index:30;background:#ffffffcc;border-bottom:1px solid var(--line);backdrop-filter:saturate(120%) blur(8px)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:40px;height:40px;border-radius:10px;background:conic-gradient(from 0deg at 60% 40%, var(--brand), var(--brand-2) 50%, var(--gold) 100%);border:1px solid var(--line);box-shadow:var(--shadow)}
+.title h1{font-size:18px;margin:0;color:var(--brand)}
+.title .sub{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#5b6a70;font-weight:600}
+.tab.active{background:linear-gradient(90deg,var(--brand),var(--brand-2));border-color:transparent;color:#fff}
+.hero{padding:28px 0 10px}
+.hero .panel{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+.kicker{font-weight:700;color:var(--brand);font-size:12px;letter-spacing:.3px;text-transform:uppercase}
+h2{font-size:24px;margin:6px 0 10px 0}
+.lead{color:var(--muted);font-size:14px;margin:0}
+.search-rail{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:14px}
+.search-rail input{padding:14px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
+.search-rail .btn{padding:12px 16px;border:none;border-radius:12px;background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;font-weight:700;cursor:pointer}
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media(min-width:720px){.cat-grid{grid-template-columns:repeat(6,1fr)}}
+.cat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;cursor:pointer;box-shadow:var(--shadow)}
+.cat.selected{border-color:var(--brand);box-shadow:0 0 0 3px rgba(27,94,32,.12)}
+.cat .emoji{font-size:20px;display:block}
+.cat .label{margin-top:6px;font-size:13px;font-weight:600}
+.section{scroll-margin-top:90px;margin:18px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+.section h3{margin:0 0 10px 0;font-size:18px}
+.section .hint{color:var(--muted);font-size:13px;margin-top:-4px}
+.results{display:grid;gap:12px}
+.item{display:grid;gap:6px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.item h4{margin:0;font-size:16px}
+.badges{display:flex;flex-wrap:wrap;gap:8px}
+.badge{font-size:12px;background:#f2f7f4;border:1px solid #dbe9df;padding:4px 8px;border-radius:999px;color:#2a6b3a}
+.meta{color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:#1f2a2e;cursor:pointer;font-weight:650}
+.btn.primary{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;border:none}
+.btn.ghost{background:#fff}
+.status{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid #dbe9df;background:#ecfbf1;color:#1b7a44;margin-left:6px}
+.form-grid{display:grid;gap:10px;grid-template-columns:repeat(12,1fr)}
+.input{grid-column:span 12;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+@media(min-width:800px){.half{grid-column:span 6}.third{grid-column:span 4}}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+th{background:#f5f8f9;color:#3c4b50}
+footer{padding:30px 0;color:#5b6a70;text-align:center}
+.bottombar{position:sticky;bottom:0;z-index:25;background:#ffffffe6;border-top:1px solid var(--line);backdrop-filter:saturate(120%) blur(8px)}
+.bottombar .wrap{display:flex;gap:10px;justify-content:space-between;padding:10px 22px}
+.bottombar .btn{flex:1}
+.hidden{display:none}
+</style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+<header>
+  <div class="wrap head">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div class="title">
+        <h1>Temple Terrace Resource Navigator</h1>
+        <div class="sub">Uptown • Temple Terrace • Tampa Bay</div>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Site tabs">
+      <a class="tab active" href="#home">Home</a>
+      <a class="tab" href="#browse">Browse</a>
+      <a class="tab" href="#submit">Submit</a>
+      <a class="tab" href="#admin">Admin</a>
+      <a class="tab" href="#contact">Contact</a>
+    </nav><button class="btn ghost" data-tab="map" style="margin-left:8px">Map</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="home" class="hero section">
+    <div class="panel">
+      <div class="kicker">Find help fast</div>
+      <h2>Food, housing, health, jobs, legal & more — all in one place</h2>
+      <p class="lead">Type what you need or tap a category below. Then call or visit the site. You can also print a list for a neighbor.</p>
+      <div class="search-rail" role="search">
+        <input id="q" type="search" placeholder="Try: food pantry near 33617, rent help, bus pass, GED…" aria-label="Search resources">
+        <button id="doSearch" class="btn">Search</button>
+      </div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <strong>Emergency?</strong> Call 911. Crisis: 988. DV hotline: 1‑800‑799‑SAFE.
+  </section>
+
+  <section id="browse" class="section card">
+    <h3>Browse resources</h3>
+    <div class="hint">Filter is now strict: when a category is selected, only matching items show (uncategorized are hidden).</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 12px 0">
+      <select id="sort" class="btn">
+        <option value="alpha">Sort A–Z</option>
+        <option value="category">Sort by category</option>
+        <option value="free">Free first</option>
+      </select>
+      <button class="btn" id="clearFilters">Clear filters</button>
+      <button class="btn" id="resetData">Reset data</button>
+      <button class="btn" id="printList">Print / Save PDF</button>
+    </div>
+    <div id="count" class="hint">Resources</div>
+    <div id="list" class="results"></div>
+  </section>
+
+  <section id="submit" class="section card">
+    <h3>Submit a resource</h3>
+    <div class="hint">Submissions go to Admin for approval before appearing publicly.</div>
+    <form id="intake" style="margin-top:10px">
+      <div class="form-grid">
+        <input class="input half" name="name" required placeholder="Organization / Program name">
+        <input class="input half" name="category" required placeholder="Category (Food, Housing, Health, Jobs, Youth, etc.)">
+        <input class="input half" name="area" placeholder="City / Neighborhood (e.g., Temple Terrace, Uptown, Brandon)">
+        <input class="input third" name="zip" placeholder="ZIP" inputmode="numeric">
+        <input class="input third" name="cost" placeholder="Cost (Free, Sliding, Paid)">
+        <input class="input" name="services" placeholder="Key services (comma-separated)">
+        <input class="input" name="website" placeholder="Website URL">
+        <input class="input" name="phone" placeholder="Phone">
+        <textarea class="input" name="notes" rows="4" placeholder="Eligibility, hours, docs needed, languages, etc."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn primary" type="submit">Send to Admin Queue</button>
+        <span class="hint">Thank you! We’ll verify and add it.</span>
+      </div>
+    </form>
+  </section>
+
+  <section id="admin" class="section card">
+    <h3>Admin review</h3>
+    <div class="hint">Double‑click “Admin” tab to sign in (demo). Passphrase <code>admin2025</code>.</div>
+    <div id="adminPanel" class="hidden">
+      <table id="pendingTable">
+        <thead><tr><th>Submitted</th><th>Name</th><th>Category</th><th>Area</th><th>Website</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="contact" class="section card">
+    <h3>Contact</h3>
+    <div class="hint">Prototype aligned to Temple Terrace Uptown Chamber style (not an official site).</div>
+  </section>
+
+<section id="mapSection" style="display:none; margin-top:10px">
+  <div id="map" style="height: 440px; border:1px solid var(--line); border-radius:12px"></div>
+</section>
+</main>
+
+
+<div class="bottombar">
+  <div class="wrap">
+    <a class="btn" href="#browse">Browse</a>
+    <a class="btn primary" href="#submit">Submit</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">© 2025 Temple Terrace Resource Navigator • Built for community use</div>
+</footer>
+
+<script>
+/* ---- Data (same preloaded set incl. Temple Terrace orgs) ---- */
+const PRELOADED = [
+  {name:"Feeding Tampa Bay",category:"Food",area:"Tampa Bay",zip:"",services:["Food pantry finder","Mobile pantries"],website:"https://feedingtampabay.org",phone:"",cost:"Free",notes:"Verify hours/locations via official site."},
+  {name:"Metropolitan Ministries",category:"Food",area:"Tampa",zip:"",services:["Meals","Food pantry","Family support"],website:"https://www.metromin.org",phone:"",cost:"Free / Eligible",notes:"Verify intake info."},
+  {name:"Crisis Center of Tampa Bay (211)",category:"Mental Health",area:"Hillsborough",zip:"",services:["24/7 support","211 referral"],website:"https://www.crisiscenter.com",phone:"",cost:"Free",notes:"Call 211 or see website."},
+  {name:"St. Vincent de Paul CARES",category:"Housing",area:"Pinellas / Tampa Bay",zip:"",services:["Homeless services","Rapid rehousing"],website:"https://www.svdpsp.org",phone:"",cost:"Free / Eligible",notes:"Verify current intake process."},
+  {name:"Pinellas Hope",category:"Housing",area:"Pinellas",zip:"",services:["Shelter","Case management"],website:"https://www.pinellashope.org",phone:"",cost:"Low-cost / Eligible",notes:"Verify capacity."},
+  {name:"Tampa Family Health Centers",category:"Health",area:"Tampa / Hillsborough",zip:"",services:["Primary care","Dental","Pharmacy"],website:"https://www.tfhc.org",phone:"",cost:"Sliding",notes:"FQHC."},
+  {name:"BayCare Behavioral Health",category:"Mental Health",area:"Tampa Bay",zip:"",services:["Counseling","Addiction services"],website:"https://baycare.org/services/behavioral-health",phone:"",cost:"Varies",notes:"Verify locations."},
+  {name:"CareerSource Tampa Bay",category:"Jobs",area:"Hillsborough",zip:"",services:["Job search","Training","Career coaching"],website:"https://www.careersourcetampabay.com",phone:"",cost:"Free / Eligible",notes:"Workforce board."},
+  {name:"CareerSource Pinellas",category:"Jobs",area:"Pinellas",zip:"",services:["Job search","Training","Career coaching"],website:"https://www.careersourcepinellas.com",phone:"",cost:"Free / Eligible",notes:"Workforce board."},
+  {name:"Hillsborough County Social Services",category:"Money",area:"Hillsborough",zip:"",services:["Utilities","Rent/eviction prevention"],website:"https://www.hillsboroughcounty.org",phone:"",cost:"Eligible",notes:"Check availability."},
+  {name:"Pinellas County Human Services",category:"Money",area:"Pinellas",zip:"",services:["Financial assistance","Health programs"],website:"https://www.pinellas.gov",phone:"",cost:"Eligible",notes:"County services."},
+  {name:"DACCO Behavioral Health",category:"Mental Health",area:"Tampa",zip:"",services:["Addiction treatment","Recovery"],website:"https://www.dacco.org",phone:"",cost:"Varies",notes:"Verify programs."},
+  {name:"211 Tampa Bay Cares",category:"Navigation",area:"Tampa Bay",zip:"",services:["Find help via 211"],website:"https://211tampabay.org",phone:"",cost:"Free",notes:"Regional referral line."},
+  {name:"PSTA / HART (Transit Info)",category:"Transport",area:"Tampa Bay",zip:"",services:["Transit info","Reduced fares"],website:"https://psta.net",phone:"",cost:"Low-cost",notes:"Add HART links as needed."},
+  {name:"Community Law Program (Pinellas)",category:"Legal",area:"Pinellas",zip:"",services:["Legal clinics","Civil legal aid"],website:"https://lawprogram.org",phone:"",cost:"Free / Eligible",notes:"Verify clinic hours."},
+  {name:"Gulfcoast Legal Services",category:"Legal",area:"Tampa Bay",zip:"",services:["Tenant rights","Immigration","Consumer"],website:"https://gulfcoastlegal.org",phone:"",cost:"Free / Eligible",notes:"Income screening may apply."},
+  {name:"Goodwill Suncoast",category:"Jobs",area:"Tampa Bay",zip:"",services:["Employment services","Training"],website:"https://goodwill-suncoast.org",phone:"",cost:"Free / Low-cost",notes:"Verify sites."},
+  {name:"Tampa Bay Network to End Hunger",category:"Food",area:"Tampa Bay",zip:"",services:["Meals on Wheels","Food access programs"],website:"https://networktoendhunger.org",phone:"",cost:"Free / Eligible",notes:"Program links on site."},
+  {name:"Suncoast Center",category:"Mental Health",area:"St. Petersburg / Pinellas",zip:"",services:["Counseling","Crisis services"],website:"https://www.suncoastcenter.org",phone:"",cost:"Varies",notes:"Verify intake."},
+  {name:"St. Vincent de Paul – Joe Latina Food Pantry",category:"Food",area:"Temple Terrace",zip:"33617",services:["Food pantry","Financial assistance referrals"],website:"https://www.templeterrace.gov/748/St-Vincent-de-Paul-Food-Pantry",phone:"",cost:"Free",notes:"Tu/Th/Sa 9–11 am (verify). 9807 N 56th St."},
+  {name:"Temple Terrace Elementary Food Pantry",category:"Food",area:"Temple Terrace",zip:"33617",services:["School family pantry"],website:"https://www.templeterrace.gov/749/Temple-Terrace-Elementary-Food-Pantry",phone:"",cost:"Free / Eligible",notes:"Mon 12:30–2 pm (verify). 124 Flotto Ave."},
+  {name:"Good Samaritan Food Pantry (Temple Terrace Presbyterian)",category:"Food",area:"Temple Terrace",zip:"33617",services:["Food pantry","Community support"],website:"https://templeterracepc.com/good_samaritan_food_pantry",phone:"",cost:"Free",notes:"Call ahead; confirm schedule. 420 Bullard Pkwy."},
+  {name:"Radiant Hands, Inc.",category:"Family",area:"Temple Terrace / North Central FL",zip:"",services:["Women & family support","Emergency assistance"],website:"https://www.radianthands.org",phone:"",cost:"Free / Eligible",notes:"Verify current programs."},
+  {name:"Project Focus Foundation",category:"Education",area:"Temple Terrace",zip:"",services:["Young adult transition","Life skills"],website:"https://projectfocusfoundation.org",phone:"",cost:"Varies / Eligible",notes:"Programs for young adults with disabilities."}
+];
+
+const ADMIN_PASS = "admin2025";
+const $ = (s, r=document)=>r.querySelector(s);
+const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+let saved=null; try{saved=JSON.parse(localStorage.getItem("tampa_live_tt"));}catch(e){saved=null}
+let LIVE = (Array.isArray(saved)&&saved.length>0)? saved : PRELOADED.slice();
+let savedP=null; try{savedP=JSON.parse(localStorage.getItem("tampa_pending_tt"));}catch(e){savedP=null}
+let PENDING = Array.isArray(savedP)? savedP : [];
+
+const cats=[["Food","🍎"],["Housing","🏘️"],["Health","❤️"],["Mental Health","🧠"],["Jobs","💼"],["Youth","🧒"],["Education","🎓"],["Money","💵"],["Legal","⚖️"],["Transport","🚌"],["Tech","💻"],["Navigation","🧭"],["Family","👨‍👩‍👧"],["Seniors","👵"],["Veterans","🎖️"]];
+const catState = new Set();
+function save(){localStorage.setItem("tampa_live_tt",JSON.stringify(LIVE));localStorage.setItem("tampa_pending_tt",JSON.stringify(PENDING));}
+function scoreFree(x){return /free/i.test(x.cost||"")?0:1;}
+
+function buildCats(){
+  const grid=$("#catGrid"); grid.innerHTML="";
+  cats.forEach(([name,emoji])=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="cat"; b.innerHTML=`<span class="emoji">${emoji}</span><span class="label">${name}</span>`;
+    b.addEventListener("click",()=>{
+      if(catState.has(name)) catState.delete(name); else catState.add(name);
+      b.classList.toggle("selected", catState.has(name));
+      renderList();
+      document.getElementById("browse").scrollIntoView({behavior:"smooth"});
+    });
+    grid.appendChild(b);
+  });
+}
+
+function renderList(){
+  const q=$("#q").value.trim().toLowerCase();
+  let data = LIVE.filter(r=>{
+    const hay=[r.name,r.category,r.area,r.zip,(r.services||[]).join(" "),r.notes||""].join(" ").toLowerCase();
+    const catOk = (catState.size===0) ? true : (!!r.category && catState.has(r.category)); // strict
+    return (!q || hay.includes(q)) && catOk;
+  });
+  const sort=$("#sort").value;
+  if(sort==="alpha") data.sort((a,b)=>a.name.localeCompare(b.name));
+  if(sort==="category") data.sort((a,b)=>a.category.localeCompare(b.category)||a.name.localeCompare(b.name));
+  if(sort==="free") data.sort((a,b)=>scoreFree(a)-scoreFree(b)||a.name.localeCompare(b.name));
+
+  $("#count").textContent=`Resources (${data.length})`;
+  const list=$("#list"); list.innerHTML="";
+  data.forEach(r=>list.appendChild(renderItem(r)));
+}
+
+function renderItem(r){
+  const el=document.createElement("div"); el.className="item";
+  const free=/free/i.test(r.cost||"");
+  el.innerHTML=`
+    <h4>${r.name} <span class="status">Verified</span></h4>
+    <div class="meta">${r.category} • ${r.area||"Tampa Bay"} ${r.zip?("• "+r.zip):""}</div>
+    <div class="badges">
+      ${(r.services||[]).slice(0,3).map(s=>`<span class="badge">${s}</span>`).join("")}
+      ${r.cost?`<span class="badge" style="${free?'border-color:#bfe9cb;background:#eaf9f0;color:#1a7a44':''}">${r.cost}</span>`:""}
+    </div>
+    ${r.notes?`<div class="meta">${r.notes}</div>`:""}
+    <div class="actions">
+      ${r.website?`<a class="btn" target="_blank" rel="noopener" href="${r.website}">Visit site</a>`:""}
+      ${r.phone?`<a class="btn ghost" href="tel:${r.phone.replace(/[^\d\+]/g,'')}">Call</a>`:""}
+    </div>`;
+  return el;
+}
+
+function renderPending(){
+  const tbody=$("#pendingTable tbody"); if(!tbody) return; tbody.innerHTML="";
+  PENDING.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${new Date(r.submitted_at||Date.now()).toLocaleString()}</td>
+                  <td>${r.name||""}</td>
+                  <td>${r.category||""}</td>
+                  <td>${r.area||""}</td>
+                  <td>${r.website?`<a href="${r.website}" target="_blank" rel="noopener">link</a>`:""}</td>
+                  <td><button class="btn primary" data-approve="${i}">Approve</button>
+                      <button class="btn" data-delete="${i}">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  $$("button[data-approve]").forEach(b=>b.onclick=()=>{const i=+b.dataset.approve; const it=PENDING.splice(i,1)[0]; LIVE.push(it); save(); renderPending(); renderList();});
+  $$("button[data-delete]").forEach(b=>b.onclick=()=>{const i=+b.dataset.delete; if(confirm("Delete this submission?")){PENDING.splice(i,1); save(); renderPending();}});
+}
+
+
+// --- Interactive Map (Leaflet) ---
+const ZIP_CENTROIDS = {
+  "33617":[28.039, -82.394],
+  "33612":[28.072, -82.449],
+  "33613":[28.081, -82.441],
+  "33602":[27.953, -82.457],
+  "33603":[27.984, -82.462],
+  "33604":[28.006, -82.460],
+  "33605":[27.957, -82.439]
+};
+const AREA_CENTROIDS = {
+  "Temple Terrace":[28.037, -82.389],
+  "Tampa":[27.964, -82.452]
+};
+let _map, _layer;
+function ensureMap(){
+  if(_map) return _map;
+  const el = document.getElementById('map');
+  if(!el) return null;
+  _map = L.map('map').setView([28.037, -82.389], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(_map);
+  _layer = L.layerGroup().addTo(_map);
+  return _map;
+}
+function pickLatLng(r){
+  if(r.lat && r.lng) return [r.lat, r.lng];
+  if(r.zip && ZIP_CENTROIDS[r.zip]) return ZIP_CENTROIDS[r.zip];
+  if(r.area && AREA_CENTROIDS[r.area]) return AREA_CENTROIDS[r.area];
+  return [28.037, -82.389];
+}
+function refreshMarkers(){
+  if(!_map || !_layer) return;
+  _layer.clearLayers();
+  const bounds = [];
+  (window.LIVE || []).forEach(r=>{
+    const [lat,lng]=pickLatLng(r);
+    const marker=L.marker([lat,lng]).addTo(_layer);
+    const html = `<strong>${r.name||''}</strong><br>${r.category||''} • ${r.area||''} ${r.zip||''}<br>${(r.services||[]).slice(0,3).join(', ')}<br>${r.phone||''} ${r.website?`<br><a target='_blank' href='${r.website}'>Website</a>`:''}`;
+    marker.bindPopup(html);
+    bounds.push([lat,lng]);
+  });
+  if(bounds.length) _map.fitBounds(bounds, {padding:[20,20]});
+}
+
+// Toggle and sync with filters
+(function(){
+  const btn = document.querySelector('[data-tab="map"]');
+  const section = document.getElementById('mapSection');
+  if(btn && section){
+    btn.addEventListener('click', ()=>{
+      const show = section.style.display==='none';
+      section.style.display = show ? 'block' : 'none';
+      if(show){ ensureMap(); refreshMarkers(); }
+    });
+  }
+  // hook renderList
+  const _render = window.renderList;
+  if(typeof _render==='function'){
+    window.renderList = function(){
+      _render();
+      if(section && section.style.display!=='none'){ ensureMap(); refreshMarkers(); }
+    };
+  }
+})();
+
+function init(){
+  // Tabs active state
+  const tabs=$$(".tab"), ids=tabs.map(a=>a.getAttribute("href").slice(1)), secs=ids.map(id=>document.getElementById(id));
+  function setActive(){ const pos=window.scrollY+90; let cur=ids[0]; secs.forEach((s,i)=>{if(s && s.offsetTop<=pos) cur=ids[i];}); tabs.forEach(a=>a.classList.toggle("active", a.getAttribute("href")==="#"+cur)); }
+  window.addEventListener("scroll", setActive, {passive:true}); setActive();
+
+  buildCats(); renderList();
+  $("#doSearch").onclick=()=>{renderList(); document.getElementById("browse").scrollIntoView({behavior:"smooth"});};
+  $("#q").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#doSearch").click(); }});
+  $("#sort").onchange=renderList;
+  $("#clearFilters").onclick=()=>{ catState.clear(); $$(".cat").forEach(c=>c.classList.remove("selected")); renderList(); };
+  $("#resetData").onclick=()=>{ localStorage.removeItem("tampa_live_tt"); localStorage.removeItem("tampa_pending_tt"); location.reload(); };
+  $("#printList").onclick=()=>window.print();
+
+  // Intake
+  $("#intake").addEventListener("submit", e=>{
+    e.preventDefault();
+    const fd=new FormData(e.target); const entry=Object.fromEntries(fd.entries());
+    entry.services=(entry.services||"").split(",").map(s=>s.trim()).filter(Boolean);
+    entry.submitted_at=new Date().toISOString(); PENDING.push(entry); save(); e.target.reset();
+    alert("Thanks! Your resource was sent to Admin for review."); renderPending();
+  });
+
+  // Admin open (double-click Admin tab)
+  const headerAdmin=document.querySelector('a.tab[href="#admin"]');
+  const loginModal=document.createElement('div'); loginModal.id="loginModal"; loginModal.className="hidden";
+  loginModal.innerHTML=`<div class="wrap" style="max-width:420px;margin:20px auto">
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Admin Sign-in</h3>
+        <input id="pass" type="password" class="input" placeholder="Admin passphrase">
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+          <button class="btn" id="closeLogin">Cancel</button>
+          <button class="btn primary" id="doLogin">Sign in</button>
+        </div>
+        <div class="section hint" style="margin-top:8px">Demo passphrase: <code>admin2025</code></div>
+      </div></div>`;
+  document.body.appendChild(loginModal);
+  headerAdmin.addEventListener("dblclick", ()=>{ loginModal.classList.remove("hidden"); document.getElementById("pass").focus(); });
+  document.addEventListener("click", e=>{
+    if(e.target && e.target.id==="closeLogin") loginModal.classList.add("hidden");
+    if(e.target && e.target.id==="doLogin"){
+      const pass=document.getElementById("pass").value;
+      if(pass===ADMIN_PASS){ loginModal.classList.add("hidden"); document.getElementById("adminPanel").classList.remove("hidden"); renderPending(); }
+      else alert("Incorrect passphrase.");
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
